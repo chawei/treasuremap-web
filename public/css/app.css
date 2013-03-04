@@ -19,6 +19,9 @@ body {
   pointer-events: all;
   position: absolute;
 }
+.marker-image.bookmarked {
+  border: 1px solid #3887BE;
+}
 
 .marker-tooltip {
   
@@ -66,6 +69,7 @@ body {
     font-size: 13px;
     width: 300px;
   }
+  
   .remove_btn {
     float: right;
     color: #3887BE;

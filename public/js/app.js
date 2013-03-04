@@ -1,9 +1,13 @@
 var currentUser = null;
+var friends = {};
 
 var App = function() {
   this.Config = {
-    FirebaseURL : "https://steampunk.firebaseIO.com"
+    FirebaseURL : "https://steampunk.firebaseIO.com",
   };
+  
+  this.Map       = null;
+  this.MarkerLayer = null;
   
   //this.currentUser = null;
   //var checkinsRef = new Firebase("https://steampunk.firebaseIO.com/users/685681169/checkins");
@@ -19,11 +23,29 @@ App.prototype = {
     this.Config.currentUserRef.on('value', function(snapshot) {
       currentUser = snapshot.val();
       that.renderUI(currentUserId);
+      that.renderFriends(currentUserId);
       that.renderBookmarks(currentUser.bookmarks);
       that.renderMap();
     });
     
     this.Config.bookmarksRef = new Firebase(App.Config.FirebaseURL + '/users' + '/' + currentUserId + '/bookmarks');
+  },
+  
+  renderFriends : function(currentUserId) {
+    var that = this;
+    this.Config.usersRef.on('value', function(snapshot) {
+      users = snapshot.val();
+      $('#friend_filter ').empty();
+      for (userId in users) {
+        var user = users[userId];
+        if (user.fb_info.id != currentUserId.toString()) {
+          console.log('add user: '+ user.fb_info.name);
+          friends[user.fb_info.id] = user;
+          $('#friend_filter ').append("<li><a href='#' class='filter active' user-id='"+user.fb_info.id+"'>"+user.fb_info.name+"</a></li>");
+          that.importCheckIns(user.checkins, user.fb_info.id);
+        }
+      }
+    });
   },
   
   renderUI : function(currentUserId) {
@@ -105,7 +127,8 @@ App.prototype = {
     var map = mapbox.map('map');
     map.addLayer(mapbox.layer().id('chawei.map-85tzbb2w'));
     
-    var markerLayer = mapbox.markers.layer();
+    this.MarkerLayer = mapbox.markers.layer();
+    var markerLayer    = this.MarkerLayer;
     var interaction = mapbox.markers.interaction(markerLayer);
     map.addLayer(markerLayer);
     
@@ -122,29 +145,8 @@ App.prototype = {
 
     map.zoom(10).center({ lat: 37.626, lon: -122.397 });
     
-    this.importCheckIns(markerLayer, currentUser.checkins, currentUser.fb_info.id);
-    //this.importCheckIns(markerLayer, CHECK_INS['jackie'].checkins.data, CHECK_INS['jackie'].checkins.id);
-    //this.importCheckIns(markerLayer, CHECK_INS['wei'].checkins.data, CHECK_INS['wei'].checkins.id);
-
-    $('.filter').click(function(e){
-      e.preventDefault();
-      
-      var thisElem = $(this);
-      var userId   = thisElem.attr('user-id');
-      if (thisElem.hasClass('active')) {
-        thisElem.removeClass('active');
-      } else {
-        thisElem.addClass('active');
-      } 
-
-      var activeUserIds = [];
-      $.each($('#friend_filter .active'), function(index, item) {
-        activeUserIds.push($(item).attr('user-id'));
-      });
-      markerLayer.filter(function(f) {
-        return ($.inArray(f.properties['user-id'], activeUserIds) !== -1);
-      });
-    });
+    this.importCheckIns(currentUser.checkins, currentUser.fb_info.id);
+    this.initFilterEvents();
 
     markerLayer.factory(function(f) {
         // Define a new factory function. This takes a GeoJSON object
@@ -164,7 +166,31 @@ App.prototype = {
         .content('<a href="http://mapbox.com/about/maps">Terms &amp; Feedback</a>');
   },
   
-  importCheckIns : function(markerLayer, checkins, userId) {
+  initFilterEvents : function() {
+    var that = this;
+    $(document).on('click', '.filter', function(e){
+      e.preventDefault();
+      
+      var thisElem = $(this);
+      var userId   = thisElem.attr('user-id');
+      if (thisElem.hasClass('active')) {
+        thisElem.removeClass('active');
+      } else {
+        thisElem.addClass('active');
+      } 
+
+      var activeUserIds = [];
+      $.each($('#map-ui .active'), function(index, item) {
+        activeUserIds.push($(item).attr('user-id'));
+      });
+      that.MarkerLayer.filter(function(f) {
+        return ($.inArray(f.properties['user-id'], activeUserIds) !== -1);
+      });
+    });
+  },
+  
+  importCheckIns : function(checkins, userId) {
+    var markerLayer = this.MarkerLayer;
     for (var i=0; i < checkins.length; i++) {
       var checkin = checkins[i];
       var description = checkin.place.location.city + ', ' + checkin.place.location.country;
