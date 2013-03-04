@@ -10,31 +10,32 @@
   <link href='css/map-ui.css' rel='stylesheet' />
 </head>
 <body>
-  <a id="fb_login" href="#">Facebook Login</a>
-  
-  <div id='map-ui'>
-    <ul id="friend_filter">
-      <li><a href='#' class='filter active' user-id='685681169'>david</a></li>
-      <li><a href='#' class='filter active' user-id='507483763'>jackie</a></li>
-      <li><a href='#' class='filter active' user-id='692124913'>wei</a></li>
-    </ul>
-  </div>
-  <div id='map'></div>
-  
   <div id="fb-root"></div>
   <script>
+    window.fbApiInit = false;
     window.fbAsyncInit = function() {
       // init the FB JS SDK
       FB.init({
         appId      : '589138441115786', // App ID from the App Dashboard
-        channelUrl : '//localhost:3000/channel.html', // Channel File for x-domain communication
+        channelUrl : '//checkinmap.herokuapp.com/channel.html', // Channel File for x-domain communication
         status     : true, // check the login status upon init?
         cookie     : true, // set sessions cookies to allow your server to access the session?
         xfbml      : true  // parse XFBML tags on this page?
       });
+      
+      fbApiInit = true;
 
       // Additional initialization code such as adding Event Listeners goes here
-
+      FB.Event.subscribe('auth.statusChange', function(response) {
+        if(response.status == 'connected') {
+          var uid = response.authResponse.userID;
+          var accessToken = response.authResponse.accessToken;
+          console.log(response.authResponse);
+          var fbLogin = document.getElementById('fb_login');
+          fbLogin.innerHTML = 'Welcome';
+          App.init(uid);
+        }
+      });
     };
 
     // Load the SDK's source Asynchronously
@@ -49,12 +50,19 @@
        ref.parentNode.insertBefore(js, ref);
      }(document, /*debug*/ false));
   </script>
+  <a id="fb_login" href="#">Facebook Login</a>
+  
+  <div id='map-ui'>
+    <ul id="friend_filter">
+      <li><a id="me_btn" href='#' class='filter active' user-id=''>me</a></li>
+      <!--<li><a href='#' class='filter active' user-id='507483763'>jackie</a></li>-->
+    </ul>
+  </div>
+  <div id='map'></div>
+
   <script type='text/javascript' src='https://cdn.firebase.com/v0/firebase.js'></script>
   <script type='text/javascript' src='https://cdn.firebase.com/v0/firebase-auth-client.js'></script>
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script type="text/javascript" charset="utf-8" src="js/david_checkins.js"></script>
-  <script type="text/javascript" charset="utf-8" src="js/jackie_checkins.js"></script>
-  <script type="text/javascript" charset="utf-8" src="js/wei_checkins.js"></script>
   <script type="text/javascript" src="js/app.js"></script>
 </body>
 </html>
