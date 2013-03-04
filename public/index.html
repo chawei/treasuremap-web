@@ -12,18 +12,19 @@
 <body>
   <div id="fb-root"></div>
   <script>
-    window.fbApiInit = false;
+    var fbAppId = "589138441115786";
+    if (window.location.href == "http://localhost:9292/") {
+      fbAppId = "313458608757859";
+    }
     window.fbAsyncInit = function() {
       // init the FB JS SDK
       FB.init({
-        appId      : '589138441115786', // App ID from the App Dashboard
+        appId      : fbAppId, // App ID from the App Dashboard
         channelUrl : '//checkinmap.herokuapp.com/channel.html', // Channel File for x-domain communication
         status     : true, // check the login status upon init?
         cookie     : true, // set sessions cookies to allow your server to access the session?
         xfbml      : true  // parse XFBML tags on this page?
       });
-      
-      fbApiInit = true;
 
       // Additional initialization code such as adding Event Listeners goes here
       FB.Event.subscribe('auth.statusChange', function(response) {
@@ -52,7 +53,7 @@
   </script>
   <a id="fb_login" href="#">Facebook Login</a>
   
-  <div id='map-ui'>
+  <div id='map-ui' class="hidden">
     <ul id="friend_filter">
       <li><a id="me_btn" href='#' class='filter active' user-id=''>me</a></li>
       <!--<li><a href='#' class='filter active' user-id='507483763'>jackie</a></li>-->

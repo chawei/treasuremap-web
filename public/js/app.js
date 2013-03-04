@@ -21,6 +21,7 @@ App.prototype = {
   },
   
   renderUI : function(currentUserId) {
+    $('#map-ui').removeClass('hidden');
     $('#me_btn').attr('user-id', currentUserId);
   },
   
@@ -151,7 +152,7 @@ $(document).ready(function() {
       } else {
         console.log('User cancelled login or did not fully authorize.');
       }
-    });
+    }, {scope: 'email,user_status'});
     
     return false;
   });

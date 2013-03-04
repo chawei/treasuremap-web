@@ -10,11 +10,6 @@ body {
   width:100%; 
 }
 
-#map [zoom > 8] {
-  marker-width: 3;
-  marker-opacity; 0.3;
-}
-
 .marker-image {
   width: 30px;
   height: 30px;
@@ -25,21 +20,23 @@ body {
   position: absolute;
 }
 
-
 #fb_login {
   position: absolute;
   z-index: 100;
-  top: 0;
-  right: 0;
+  top: 5px;
+  right: 5px;
   
   font-size:13px;
-  background:#FFF;
-  color:#3C4E5A;
+  background:#3887BE;
+  color:#FFF;
   display:block;
-  margin:0;padding:0;
-  border:1px solid #BBB;
-  border-bottom-width:0;
-  min-width:138px;
+  margin:0;
   padding:10px;
+  border:1px solid #3887BE;
+  min-width:138px;
   text-decoration:none;
+}
+
+.hidden {
+  display: none;
 }
