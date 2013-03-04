@@ -13,7 +13,7 @@
   <div id="fb-root"></div>
   <script>
     var fbAppId = "589138441115786";
-    if (window.location.href == "http://localhost:9292/") {
+    if (window.location.href.search("localhost") !== -1) {
       fbAppId = "313458608757859";
     }
     window.fbAsyncInit = function() {
@@ -59,6 +59,8 @@
       <!--<li><a href='#' class='filter active' user-id='507483763'>jackie</a></li>-->
     </ul>
   </div>
+  
+  <div id="bookmarks"></div>
   <div id='map'></div>
 
   <script type='text/javascript' src='https://cdn.firebase.com/v0/firebase.js'></script>

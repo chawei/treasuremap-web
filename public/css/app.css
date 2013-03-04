@@ -20,6 +20,21 @@ body {
   position: absolute;
 }
 
+.marker-tooltip {
+  
+}
+  .marker-title {
+    font-size: 13px;
+  }
+    .save_btn {
+      margin-left: 10px;
+      color: #3887BE;
+    }
+  .marker-description {
+    font-size: 11px;
+    color: #999;
+  }
+
 #fb_login {
   position: absolute;
   z-index: 100;
@@ -27,7 +42,7 @@ body {
   right: 5px;
   
   font-size:13px;
-  background:#3887BE;
+  background: #3887BE;
   color:#FFF;
   display:block;
   margin:0;
@@ -36,6 +51,25 @@ body {
   min-width:138px;
   text-decoration:none;
 }
+
+#bookmarks {
+  position: absolute;
+  z-index: 100;
+  bottom: 40px;
+  left: 10px;
+}
+  .bookmark {
+    margin-top: 1px;
+    background: #f6f6f6;
+    color: #333;
+    padding: 10px;
+    font-size: 13px;
+    width: 300px;
+  }
+  .remove_btn {
+    float: right;
+    color: #3887BE;
+  }
 
 .hidden {
   display: none;
