@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Checkins</title>
+  
+  <script src='http://api.tiles.mapbox.com/mapbox.js/v0.6.7/mapbox.js'></script>
+  <link href='http://api.tiles.mapbox.com/mapbox.js/v0.6.7/mapbox.css' rel='stylesheet' />
+  
+  <link href='css/app.css' rel='stylesheet' />
+  <link href='css/map-ui.css' rel='stylesheet' />
+</head>
+<body>
+  <a id="fb_login" href="#">Facebook Login</a>
+  
+  <div id='map-ui'>
+    <ul id="friend_filter">
+      <li><a href='#' class='filter active' user-id='685681169'>david</a></li>
+      <li><a href='#' class='filter active' user-id='507483763'>jackie</a></li>
+      <li><a href='#' class='filter active' user-id='692124913'>wei</a></li>
+    </ul>
+  </div>
+  <div id='map'></div>
+  
+  <div id="fb-root"></div>
+  <script>
+    window.fbAsyncInit = function() {
+      // init the FB JS SDK
+      FB.init({
+        appId      : '589138441115786', // App ID from the App Dashboard
+        channelUrl : '//localhost:3000/channel.html', // Channel File for x-domain communication
+        status     : true, // check the login status upon init?
+        cookie     : true, // set sessions cookies to allow your server to access the session?
+        xfbml      : true  // parse XFBML tags on this page?
+      });
+
+      // Additional initialization code such as adding Event Listeners goes here
+
+    };
+
+    // Load the SDK's source Asynchronously
+    // Note that the debug version is being actively developed and might 
+    // contain some type checks that are overly strict. 
+    // Please report such bugs using the bugs tool.
+    (function(d, debug){
+       var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+       if (d.getElementById(id)) {return;}
+       js = d.createElement('script'); js.id = id; js.async = true;
+       js.src = "//connect.facebook.net/en_US/all" + (debug ? "/debug" : "") + ".js";
+       ref.parentNode.insertBefore(js, ref);
+     }(document, /*debug*/ false));
+  </script>
+  <script type='text/javascript' src='https://cdn.firebase.com/v0/firebase.js'></script>
+  <script type='text/javascript' src='https://cdn.firebase.com/v0/firebase-auth-client.js'></script>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script type="text/javascript" charset="utf-8" src="js/david_checkins.js"></script>
+  <script type="text/javascript" charset="utf-8" src="js/jackie_checkins.js"></script>
+  <script type="text/javascript" charset="utf-8" src="js/wei_checkins.js"></script>
+  <script type="text/javascript" src="js/app.js"></script>
+</body>
+</html>
