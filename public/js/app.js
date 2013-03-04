@@ -22,9 +22,9 @@ App.prototype = {
       currentUser = snapshot.val();
       that.renderUI(currentUserId);
       that.renderFriends(currentUserId);
+      that.renderMap();
       that.fetchAndRenderBookmarks(currentUserId);
       //that.renderBookmarks(currentUser.bookmarks);
-      that.renderMap();
     });
     
     this.Config.bookmarksRef = new Firebase(App.Config.FirebaseURL + '/users/' + currentUserId + '/bookmarks');
@@ -58,7 +58,7 @@ App.prototype = {
       var markerTitle   = markerTooltip.find('.marker-title');
       var userId        = markerTitle.attr('user-id');
       var checkinId     = markerTitle.attr('checkin-id');
-      console.log('Save '+markerTitle.text());
+      console.log('Saving '+markerTitle.text());
       console.log(checkinId);
       
       var checkin        = that.findCheckin(userId, checkinId);
@@ -69,16 +69,19 @@ App.prototype = {
         if (snapshot.val() === null) {
           var newBookmarkRef = App.Config.bookmarksRef.push();
           newBookmarkRef.setWithPriority({origin: {id: userId}, checkin: checkin}, checkinId);
+          console.log('treasure saved');
+          $(".marker-image[checkin-id="+checkinId.toString()+"]").addClass('bookmarked');
         }
       });
       return false;
     });
   },
   
-  removeBookmark : function(bookmarkId) {
+  removeBookmark : function(bookmarkId, checkinId) {
     var currentUserId = currentUser.fb_info.id;
     var bookmarkRef   = new Firebase("https://steampunk.firebaseIO.com/users/"+currentUserId+"/bookmarks/"+bookmarkId);
     bookmarkRef.remove();
+    $(".marker-image[checkin-id="+checkinId.toString()+"]").removeClass('bookmarked');
   },
   
   fetchAndRenderBookmarks : function(userId) {
@@ -97,12 +100,13 @@ App.prototype = {
     for (bookmarkId in bookmarks) {
       var bookmark = bookmarks[bookmarkId];
       var checkin  = bookmark.checkin;
-      bookmarksElem.prepend(['<div class="bookmark cf" bookmark-id="', bookmarkId, '">', 
+      bookmarksElem.prepend(['<div class="bookmark cf" checkin-id="', checkin.id, '" bookmark-id="', bookmarkId, '">', 
                                 '<img class="shared_by" src="', 
                                   'https://graph.facebook.com/', bookmark.origin.id, '/picture', '" />',
                                 '<div class="name">', checkin.place.name, '</div>',
                                 '<a class="remove_btn" href="#">remove</a></div>'].join('')
                             );
+      $(".marker-image[checkin-id="+checkin.id.toString()+"]").addClass('bookmarked');
     }
     
     var that = this;
@@ -112,7 +116,8 @@ App.prototype = {
       var btn          = $(this);
       var bookmarkElem = btn.parents('.bookmark');
       var bookmarkId   = bookmarkElem.attr('bookmark-id');
-      that.removeBookmark(bookmarkId);
+      var checkinId    = bookmarkElem.attr('checkin-id');
+      that.removeBookmark(bookmarkId, checkinId);
       bookmarkElem.remove();
     });
   },

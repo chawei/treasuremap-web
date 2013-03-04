@@ -89,6 +89,12 @@ body {
 .hidden {
   display: none;
 }
-.cf {
+
+.cf:after {
+  content: ".";
+  display: block;
   clear: both;
+  visibility: hidden;
+  line-height: 0;
+  height: 0;
 }
