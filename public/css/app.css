@@ -68,6 +68,17 @@ body {
     padding: 10px;
     font-size: 13px;
     width: 300px;
+    min-height: 20px;
+  }
+  .bookmark .shared_by {
+    float: left;
+    margin: 0 6px 0 0;
+    width: 20px;
+  }
+  .bookmark .name {
+    float: left;
+    margin: 2px 0 0;
+    width: 220px;
   }
   
   .remove_btn {
@@ -77,4 +88,7 @@ body {
 
 .hidden {
   display: none;
+}
+.cf {
+  clear: both;
 }

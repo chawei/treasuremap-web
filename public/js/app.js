@@ -1,18 +1,16 @@
 var currentUser = null;
-var friends = {};
+var friends  = {};
+var allUsers = {};
 
 var App = function() {
   this.Config = {
     FirebaseURL : "https://steampunk.firebaseIO.com",
   };
   
-  this.Map       = null;
+  this.Map         = null;
   this.MarkerLayer = null;
   
   //this.currentUser = null;
-  //var checkinsRef = new Firebase("https://steampunk.firebaseIO.com/users/685681169/checkins");
-  //var checkinsQuery = checkinsRef.startAt(10151347716696170);
-  //checkinsQuery.on('child_added', function(childSnapshot) { /* handle child add */ });
 };
 
 App.prototype = {
@@ -20,21 +18,23 @@ App.prototype = {
     var that = this;
     this.Config.usersRef       = new Firebase(App.Config.FirebaseURL + '/users');
     this.Config.currentUserRef = new Firebase(App.Config.FirebaseURL + '/users' + '/' + currentUserId);
-    this.Config.currentUserRef.on('value', function(snapshot) {
+    this.Config.currentUserRef.once('value', function(snapshot) {
       currentUser = snapshot.val();
       that.renderUI(currentUserId);
       that.renderFriends(currentUserId);
-      that.renderBookmarks(currentUser.bookmarks);
+      that.fetchAndRenderBookmarks(currentUserId);
+      //that.renderBookmarks(currentUser.bookmarks);
       that.renderMap();
     });
     
-    this.Config.bookmarksRef = new Firebase(App.Config.FirebaseURL + '/users' + '/' + currentUserId + '/bookmarks');
+    this.Config.bookmarksRef = new Firebase(App.Config.FirebaseURL + '/users/' + currentUserId + '/bookmarks');
   },
   
   renderFriends : function(currentUserId) {
     var that = this;
-    this.Config.usersRef.on('value', function(snapshot) {
-      users = snapshot.val();
+    this.Config.usersRef.once('value', function(snapshot) {
+      var users = snapshot.val();
+      window.allUsers = users;
       $('#friend_filter ').empty();
       for (userId in users) {
         var user = users[userId];
@@ -56,22 +56,21 @@ App.prototype = {
     $(document).on("click", '.marker-title .save_btn', function(){
       var markerTooltip = $(this).parents('.marker-tooltip');
       var markerTitle   = markerTooltip.find('.marker-title');
+      var userId        = markerTitle.attr('user-id');
       var checkinId     = markerTitle.attr('checkin-id');
       console.log('Save '+markerTitle.text());
       console.log(checkinId);
       
-      var checkin = that.findCheckin(checkinId);
-      if (checkin !== null) {
-        var checkinId = parseFloat(checkinId);
-        var bookmarksRef = new Firebase("https://steampunk.firebaseIO.com/users/"+currentUserId+"/bookmarks");
-        var bookmarksQuery = bookmarksRef.startAt(checkinId).endAt(checkinId);
-        bookmarksQuery.on('value', function(snapshot) {
-          if (snapshot.val() === null) {
-            var newBookmarkRef = App.Config.bookmarksRef.push();
-            newBookmarkRef.setWithPriority(checkin, checkinId);
-          }
-        });
-      }
+      var checkin        = that.findCheckin(userId, checkinId);
+      var checkinId      = parseFloat(checkinId);
+      var bookmarksRef   = new Firebase("https://steampunk.firebaseIO.com/users/"+currentUserId+"/bookmarks");
+      var bookmarksQuery = bookmarksRef.startAt(checkinId).endAt(checkinId);
+      bookmarksQuery.once('value', function(snapshot) {
+        if (snapshot.val() === null) {
+          var newBookmarkRef = App.Config.bookmarksRef.push();
+          newBookmarkRef.setWithPriority({origin: {id: userId}, checkin: checkin}, checkinId);
+        }
+      });
       return false;
     });
   },
@@ -97,7 +96,13 @@ App.prototype = {
     bookmarksElem.empty();
     for (bookmarkId in bookmarks) {
       var bookmark = bookmarks[bookmarkId];
-      bookmarksElem.prepend('<div class="bookmark" bookmark-id="'+bookmarkId+'">'+bookmark.place.name+'<a class="remove_btn" href="#">remove</a></div>');
+      var checkin  = bookmark.checkin;
+      bookmarksElem.prepend(['<div class="bookmark cf" bookmark-id="', bookmarkId, '">', 
+                                '<img class="shared_by" src="', 
+                                  'https://graph.facebook.com/', bookmark.origin.id, '/picture', '" />',
+                                '<div class="name">', checkin.place.name, '</div>',
+                                '<a class="remove_btn" href="#">remove</a></div>'].join('')
+                            );
     }
     
     var that = this;
@@ -112,9 +117,10 @@ App.prototype = {
     });
   },
   
-  findCheckin : function(checkinId) {
+  findCheckin : function(userId, checkinId) {
     var targetCheckin = null;
-    $.each(currentUser.checkins, function(index, checkin) {
+    var user = allUsers[userId];
+    $.each(user.checkins, function(index, checkin) {
       if (checkin.id === checkinId.toString()) {
         targetCheckin = checkin;
         return false;
@@ -133,7 +139,7 @@ App.prototype = {
     map.addLayer(markerLayer);
     
     interaction.formatter(function(feature) {
-      var o = ['<div class="marker-title" checkin-id="', feature.properties["checkin-id"], '">',
+      var o = ['<div class="marker-title" user-id="', feature.properties["user-id"], '" checkin-id="', feature.properties["checkin-id"], '">',
                   feature.properties.title,
                   '<a class="save_btn" href="#">save</a>',
                 '</div>',
@@ -155,6 +161,7 @@ App.prototype = {
             var img = document.createElement('img');
             img.className = 'marker-image';
             img.setAttribute('src', f.properties.image);
+            img.setAttribute('checkin-id', f.properties["checkin-id"]);
             return img;
         });
 
